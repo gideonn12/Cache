@@ -38,9 +38,54 @@ void print_cache(cache_t cache) {
 }
 
 cache_t initialize_cache(uchar s, uchar t, uchar b, uchar E) {
+    cache_t myCache;
+    myCache.s = s;
+    myCache.t = t;
+    myCache.b = b;
+    myCache.E = E;
+    myCache.cache = (cache_line_t **) malloc((1 << s) * sizeof(cache_line_t *));
+    for (int i = 0; i < (1 << s); i++) {
+        myCache.cache[i] = (cache_line_t *) malloc(E * sizeof(cache_line_t));
+        for (int j = 0; j < E; j++) {
+            myCache.cache[i][j].valid = 0;
+            myCache.cache[i][j].frequency = 0;
+            myCache.cache[i][j].tag = 0;
+            myCache.cache[i][j].block = malloc((1 << b) * sizeof(uchar));
+        }
+    }
+    return myCache;
 }
 
 uchar read_byte(cache_t cache, uchar *start, long int off) {
+    int block = off & ((1 << cache.b) - 1);
+    int set = (off >> cache.b) & ((1 << cache.s) - 1);
+    int tag = off >> (cache.b + cache.s);
+
+    for (int i = 0; i < cache.E; i++) {
+        if (cache.cache[set][i].valid == 1 && cache.cache[set][i].tag == tag) {
+            cache.cache[set][i].frequency++;
+            return cache.cache[set][i].block[block];
+        }
+    }
+    for (int i = 0; i < cache.E; i++) {
+        if (cache.cache[set][i].valid != 1) {
+            cache.cache[set][i].valid = 1;
+            cache.cache[set][i].tag = tag;
+            cache.cache[set][i].frequency = 1;
+            cache.cache[set][i].block = start + off;
+            return cache.cache[set][i].block[block];
+        }
+    }
+    int min = 0;
+    for (int i = 1; i < cache.E; i++) {
+        if (cache.cache[set][i].frequency < cache.cache[set][min].frequency) {
+            min = i;
+        }
+    }
+    cache.cache[set][min].tag = tag;
+    cache.cache[set][min].frequency = 1;
+    cache.cache[set][min].block = start + off;
+    return cache.cache[set][min].block[block];
 }
 
 int main() {
