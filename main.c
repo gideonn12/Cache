@@ -50,7 +50,7 @@ cache_t initialize_cache(uchar s, uchar t, uchar b, uchar E) {
             myCache.cache[i][j].valid = 0;
             myCache.cache[i][j].frequency = 0;
             myCache.cache[i][j].tag = 0;
-            myCache.cache[i][j].block = malloc((1 << b) * sizeof(uchar));
+            myCache.cache[i][j].block = calloc((1 << b) * sizeof(uchar), sizeof(uchar));
         }
     }
     return myCache;
@@ -101,7 +101,6 @@ int main() {
     printf("s t b E: ");
     scanf("%d %d %d %d", &s, &t, &b, &E);
     cache_t cache = initialize_cache(s, t, b, E);
-
     while (1) {
         scanf("%d", &n);
         if (n < 0) break;
