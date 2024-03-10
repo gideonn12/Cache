@@ -57,16 +57,19 @@ cache_t initialize_cache(uchar s, uchar t, uchar b, uchar E) {
 }
 
 uchar read_byte(cache_t cache, uchar *start, long int off) {
+    // calculate the set, tag and block
     int block = off & ((1 << cache.b) - 1);
     int set = (off >> cache.b) & ((1 << cache.s) - 1);
     int tag = off >> (cache.b + cache.s);
 
+    // search if already in cache
     for (int i = 0; i < cache.E; i++) {
         if (cache.cache[set][i].valid == 1 && cache.cache[set][i].tag == tag) {
             cache.cache[set][i].frequency++;
             return cache.cache[set][i].block[block];
         }
     }
+    // if not in cache, find a place to put it maybe something is invalid
     for (int i = 0; i < cache.E; i++) {
         if (cache.cache[set][i].valid != 1) {
             cache.cache[set][i].valid = 1;
@@ -76,12 +79,14 @@ uchar read_byte(cache_t cache, uchar *start, long int off) {
             return cache.cache[set][i].block[block];
         }
     }
+    // if not, find the least frequent and replace it
     int min = 0;
     for (int i = 1; i < cache.E; i++) {
         if (cache.cache[set][i].frequency < cache.cache[set][min].frequency) {
             min = i;
         }
     }
+    // replace the least frequent
     cache.cache[set][min].tag = tag;
     cache.cache[set][min].frequency = 1;
     cache.cache[set][min].block = start + off;
