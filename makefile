@@ -4,13 +4,13 @@ MAIN = cache
 
 .PHONY: all clean
 
-all: cache
+all: main
 
 $(MAIN): main.o 
 	$(CC) $(CFLAGS) $^ -o $@ -no-pie
 
 main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) -c cache.c
 
 clean:
 	rm -f *.o $(MAIN)
