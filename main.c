@@ -75,7 +75,7 @@ uchar read_byte(cache_t cache, uchar *start, long int off) {
             cache.cache[set][i].valid = 1;
             cache.cache[set][i].tag = tag;
             cache.cache[set][i].frequency = 1;
-            cache.cache[set][i].block = start + off;
+            cache.cache[set][i].block = start + off- block;
             return cache.cache[set][i].block[block];
         }
     }
@@ -89,7 +89,7 @@ uchar read_byte(cache_t cache, uchar *start, long int off) {
     // replace the least frequent
     cache.cache[set][min].tag = tag;
     cache.cache[set][min].frequency = 1;
-    cache.cache[set][min].block = start + off;
+    cache.cache[set][min].block = start + off- block;
     return cache.cache[set][min].block[block];
 }
 
